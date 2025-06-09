@@ -13,38 +13,81 @@ import {
   Scalar,
 } from "@babylonjs/core";
 
-// --- Initialisation de l’engine et de la scène ---
+import {
+  AdvancedDynamicTexture,
+  TextBlock,
+  StackPanel,
+  Control,
+} from "@babylonjs/gui";
+
+// Import de la classe et du type (type-only import pour LevelEvent)
+import { LevelManager } from "./levelmanager";
+import type { LevelEvent } from "./levelmanager";
+
+import { enemies, obstacles, items } from "./spawners"; // ← IMPORTS ESSENTIELS
+// pour les tableaux PARTAGÉS
+
+// --- Initialisation de l'engine et de la scène ---
 const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
 const engine = new Engine(canvas, true);
 const scene = new Scene(engine);
 
 // --- Caméra de suivi ---
 const camera = new FollowCamera("FollowCam", new Vector3(0, 0, 0), scene);
-// note : attachControl ne prend plus que 0 ou 1 argument
-camera.attachControl(false);
+camera.attachControl(false); // plus qu'un seul booléen
 
-// --- Lumière ---
+// --- Lumière ambiante ---
 const light = new HemisphericLight("hemiLight", new Vector3(0, 1, 0), scene);
 light.intensity = 0.8;
 
 // --- Vaisseau joueur ---
 const playerShip = MeshBuilder.CreateBox(
   "playerShip",
-  {
-    width: 2,
-    height: 0.5,
-    depth: 4,
-  },
+  { width: 2, height: 0.5, depth: 4 },
   scene
 );
 playerShip.position.set(0, 5, 0);
-// on désactive la rotation quaternion pour n’utiliser que rotation.x/y/z
-playerShip.rotationQuaternion = null;
+playerShip.rotationQuaternion = null; // on utilise rotation.x/y/z
 const shipMat = new StandardMaterial("shipMat", scene);
 shipMat.diffuseColor = new Color3(0.2, 0.5, 0.8);
 playerShip.material = shipMat;
 
-// configuration de la caméra pour suivre le vaisseau
+// --- Chargement et instanciation du LevelManager ---
+let levelManager: LevelManager;
+fetch("/levels/level1.json")
+  .then((res) => res.json())
+  .then((events: LevelEvent[]) => {
+    levelManager = new LevelManager(
+      scene,
+      engine,
+      () => playerShip.position.z,
+      events,
+      () => {
+        console.log("🏆 Victoire ! Fin du niveau.");
+        // ici tu peux appeler engine.stopRenderLoop() ou afficher un écran de fin
+      }
+    );
+  })
+  .catch((err) =>
+    console.error("Impossible de charger /levels/level1.json", err)
+  );
+
+fetch("/levels/level1.json")
+  .then((res) => res.json())
+  .then((events: LevelEvent[]) => {
+    levelManager = new LevelManager(
+      scene,
+      engine,
+      () => playerShip.position.z,
+      events,
+      () => {
+        console.log("Niveau terminé !");
+        engine.stopRenderLoop();
+      }
+    );
+  });
+
+// Config caméra pour suivre le vaisseau
 camera.lockedTarget = playerShip;
 camera.rotationOffset = 180;
 camera.heightOffset = 5;
@@ -53,18 +96,18 @@ camera.cameraAcceleration = 0.5;
 camera.maxCameraSpeed = 50;
 
 // --- Sol ---
+const levelLength = 600; // même valeur que le dernier triggerZ de ton level1.json
+const groundWidth = 500; // largeur en X, tu peux ajuster
 const ground = MeshBuilder.CreateGround(
   "ground",
-  {
-    width: 500,
-    height: 500,
-  },
+  { width: groundWidth, height: levelLength },
   scene
 );
 const groundMat = new StandardMaterial("groundMat", scene);
 groundMat.diffuseColor = new Color3(0.1, 0.7, 0.1);
 ground.material = groundMat;
 ground.position.y = 0;
+ground.position.z = levelLength / 2;
 
 // --- Variables de jeu ---
 let playerHP = 100;
@@ -77,27 +120,11 @@ const brakeMult = 0.5;
 let laserLevel = 0;
 let bombCount = 3;
 
-// pools de projectiles
+// Pools de projectiles
 const lasers: Mesh[] = [];
 const bombs: Mesh[] = [];
 
-// définition d’un type pour les ennemis
-type Enemy = {
-  mesh: Mesh;
-  hp: number;
-  type: number;
-  vx?: number;
-  originX?: number;
-  rangeX?: number;
-  shootTimer?: number;
-  fireInterval?: number;
-};
-const enemies: Enemy[] = [];
 const enemyBullets: Mesh[] = [];
-
-// obstacles et bonus
-const obstacles: Mesh[] = [];
-const items: { mesh: Mesh; type: string }[] = [];
 
 // --- Matériaux ---
 const laserMatNormal = new StandardMaterial("laserNorm", scene);
@@ -142,11 +169,11 @@ const laserSpeed = 100;
 const bombSpeed = 50;
 const enemyBullSpeed = 30;
 
-// nouvel : cooldown de collision
-let collisionCooldown = 0; // secondes
-const collisionRecoil = 10; // unités de recul
+// collision recoil
+let collisionCooldown = 0;
+const collisionRecoil = 10;
 
-// --- Création d’ennemis de test ---
+// --- Création de quelques ennemis ---
 const e1 = MeshBuilder.CreateSphere("e1", { diameter: 1 }, scene);
 e1.material = enemyMat;
 e1.position.set(0, 10, 100);
@@ -157,7 +184,7 @@ e2.material = enemyMat;
 e2.position.set(10, 1, 80);
 enemies.push({ mesh: e2, hp: 15, type: 2, shootTimer: 0, fireInterval: 2 });
 
-// --- Obstacles de test ---
+// --- Création d'obstacles ---
 const p1 = MeshBuilder.CreateBox(
   "p1",
   { width: 2, height: 10, depth: 2 },
@@ -188,10 +215,10 @@ hill.position.set(-20, 5, 150);
 obstacles.push(p1, p2, b1, b2, hill);
 obstacles.forEach((o) => (o.material = obsMat));
 
-// --- Bonus de test ---
+// --- Création de bonus ---
 for (let i = 0; i < 3; i++) {
   const ring = MeshBuilder.CreateTorus(
-    "ringSilver" + i,
+    "rS" + i,
     { diameter: 5, thickness: 0.5 },
     scene
   );
@@ -201,7 +228,7 @@ for (let i = 0; i < 3; i++) {
   items.push({ mesh: ring, type: "silver" });
 }
 const ringGold = MeshBuilder.CreateTorus(
-  "ringGold",
+  "rG",
   { diameter: 5, thickness: 0.5 },
   scene
 );
@@ -225,6 +252,36 @@ bp.position.set(0, 5, 70);
 bp.material = whiteMat;
 items.push({ mesh: bp, type: "bomb" });
 
+// --- HUD avec Babylon GUI ---
+const gui = AdvancedDynamicTexture.CreateFullscreenUI("UI");
+const panel = new StackPanel();
+panel.width = "220px";
+panel.isVertical = true;
+panel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+panel.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
+gui.addControl(panel);
+
+const hpText = new TextBlock();
+hpText.text = "HP : 100";
+hpText.color = "white";
+hpText.fontSize = 24;
+hpText.height = "30px";
+panel.addControl(hpText);
+
+const bombText = new TextBlock();
+bombText.text = "Bombes : 3";
+bombText.color = "white";
+bombText.fontSize = 24;
+bombText.height = "30px";
+panel.addControl(bombText);
+
+const laserText = new TextBlock();
+laserText.text = "Laser : Single";
+laserText.color = "white";
+laserText.fontSize = 24;
+laserText.height = "30px";
+panel.addControl(laserText);
+
 // --- Gestion du clavier ---
 const inputMap: { [key: string]: boolean } = {};
 window.addEventListener(
@@ -236,17 +293,22 @@ window.addEventListener(
   (e) => (inputMap[e.key.toLowerCase()] = false)
 );
 
-// --- Boucle de jeu ---
+// --- Boucle de jeu principale ---
 scene.onBeforeRenderObservable.add(() => {
   const dt = engine.getDeltaTime() / 1000;
   elapsedTime += dt;
 
-  // mise à jour cooldown collision
+  //  mise à jour LevelManager
+  if (levelManager) {
+    levelManager.update();
+  }
+
+  // mise à jour du cooldown de collision
   if (collisionCooldown > 0) {
     collisionCooldown -= dt;
   }
 
-  // calcul de la vitesse d’avance, bloquée si cooldown
+  // calcul de la vitesse d'avance, bloquée si en cooldown
   let speedZ = 0;
   if (collisionCooldown <= 0) {
     speedZ = forwardSpeed;
@@ -254,7 +316,7 @@ scene.onBeforeRenderObservable.add(() => {
     if (inputMap["control"]) speedZ = forwardSpeed * brakeMult;
   }
 
-  // mouvements lat/vert
+  // mouvements lat / vert
   let speedX = 0,
     speedY = 0;
   if (inputMap["arrowleft"] || inputMap["q"] || inputMap["a"])
@@ -264,16 +326,16 @@ scene.onBeforeRenderObservable.add(() => {
     speedY = verticalSpeed;
   if (inputMap["arrowdown"] || inputMap["s"]) speedY = -verticalSpeed;
 
-  // appliquer déplacement vaisseau
+  // appliquer déplacement du vaisseau
   playerShip.position.x += speedX * dt;
   playerShip.position.y += speedY * dt;
   playerShip.position.z += speedZ * dt;
 
-  // limiter zone de vol
+  // limiter la zone de vol
   playerShip.position.x = Scalar.Clamp(playerShip.position.x, -25, 25);
   playerShip.position.y = Scalar.Clamp(playerShip.position.y, 1, 30);
 
-  // inclinaison visuelle (roll/pitch)
+  // inclinaison visuelle (roll & pitch)
   if (
     (inputMap["arrowleft"] || inputMap["q"] || inputMap["a"]) &&
     !(inputMap["arrowright"] || inputMap["d"])
@@ -395,18 +457,18 @@ scene.onBeforeRenderObservable.add(() => {
     }
   }
 
-  // mise à jour ennemis (mouvement & tir)
+  // mise à jour ennemis
   for (let i = enemies.length - 1; i >= 0; i--) {
     const enemy = enemies[i];
     if (enemy.type === 1 && enemy.vx) {
       enemy.mesh.position.x += enemy.vx * dt;
-      if (enemy.originX !== undefined && enemy.rangeX !== undefined) {
-        if (
-          enemy.mesh.position.x > enemy.originX + enemy.rangeX ||
-          enemy.mesh.position.x < enemy.originX - enemy.rangeX
-        ) {
-          enemy.vx = -enemy.vx;
-        }
+      if (
+        enemy.originX !== undefined &&
+        enemy.rangeX !== undefined &&
+        (enemy.mesh.position.x > enemy.originX + enemy.rangeX ||
+          enemy.mesh.position.x < enemy.originX - enemy.rangeX)
+      ) {
+        enemy.vx = -enemy.vx;
       }
     }
     if (enemy.type === 2) {
@@ -504,14 +566,12 @@ scene.onBeforeRenderObservable.add(() => {
     }
   }
 
-  // *** CORRECTION COLLISION OBSTACLE ***
-  for (let o of obstacles) {
-    if (o.intersectsMesh(playerShip, false)) {
+  // collisions joueur -> obstacles
+  for (const obs of obstacles) {
+    if (obs.intersectsMesh(playerShip, false)) {
       playerHP -= 10;
       console.log("Impact obstacle ! HP =", playerHP);
-      // recul renforcé
       playerShip.position.z -= collisionRecoil;
-      // blocage avance 0.5s
       collisionCooldown = 0.5;
       if (playerHP <= 0) console.log("GAME OVER");
     }
@@ -519,28 +579,26 @@ scene.onBeforeRenderObservable.add(() => {
 
   // collisions tirs -> obstacles
   for (let i = lasers.length - 1; i >= 0; i--) {
-    for (let o of obstacles) {
-      if (lasers[i].intersectsMesh(o, false)) {
-        lasers[i].dispose();
-        lasers.splice(i, 1);
-        break;
-      }
+    if (obstacles.some((obs) => lasers[i].intersectsMesh(obs, false))) {
+      lasers[i].dispose();
+      lasers.splice(i, 1);
+      break;
     }
   }
+
+  // collisions bombes -> obstacles
   for (let i = bombs.length - 1; i >= 0; i--) {
-    for (let o of obstacles) {
-      if (bombs[i].intersectsMesh(o, false)) {
-        bombs[i].dispose();
-        bombs.splice(i, 1);
-        break;
-      }
+    if (obstacles.some((obs) => bombs[i].intersectsMesh(obs, false))) {
+      bombs[i].dispose();
+      bombs.splice(i, 1);
+      break;
     }
   }
 
   // collisions joueur -> bonus
-  for (let m = items.length - 1; m >= 0; m--) {
-    if (items[m].mesh.intersectsMesh(playerShip, false)) {
-      const type = items[m].type;
+  for (let i = items.length - 1; i >= 0; i--) {
+    if (items[i].mesh.intersectsMesh(playerShip, false)) {
+      const type = items[i].type;
       if (type === "silver") {
         playerHP = Math.min(playerHP + 10, 100);
         console.log("Anneau argent ! HP =", playerHP);
@@ -563,12 +621,19 @@ scene.onBeforeRenderObservable.add(() => {
           console.log("Bombe +1 ! Bombes =", bombCount);
         }
       }
-      items[m].mesh.dispose();
-      items.splice(m, 1);
+      items[i].mesh.dispose();
+      items.splice(i, 1);
     }
   }
+
+  // --- Mise à jour du HUD ---
+  hpText.text = `HP : ${playerHP}`;
+  bombText.text = `Bombes : ${bombCount}`;
+  laserText.text = `Laser : ${
+    laserLevel === 0 ? "Single" : laserLevel === 1 ? "Double" : "Hyper"
+  }`;
 });
 
-// démarrage de la boucle de rendu
+// --- Démarrage de la boucle de rendu ---
 engine.runRenderLoop(() => scene.render());
 window.addEventListener("resize", () => engine.resize());

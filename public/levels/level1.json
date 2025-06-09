@@ -1,0 +1,171 @@
+[
+  {
+    "triggerZ": 20,
+    "type": "spawnItem",
+    "params": { "itemType": "silver", "x": 0, "y": 8, "z": 20 }
+  },
+  {
+    "triggerZ": 40,
+    "type": "spawnEnemy",
+    "params": {
+      "enemyType": 1,
+      "x": -8,
+      "y": 10,
+      "offsetZ": 50,
+      "vx": 6,
+      "rangeX": 12
+    }
+  },
+  {
+    "triggerZ": 60,
+    "type": "spawnObstacle",
+    "params": { "obstacle": "arch", "x": 0, "y": 0, "offsetZ": 50 }
+  },
+  {
+    "triggerZ": 80,
+    "type": "spawnItem",
+    "params": { "itemType": "bomb", "x": 5, "y": 5, "offsetZ": 50 }
+  },
+  {
+    "triggerZ": 100,
+    "type": "spawnEnemy",
+    "params": {
+      "enemyType": 2,
+      "x": 8,
+      "y": 1,
+      "offsetZ": 50,
+      "fireInterval": 2
+    }
+  },
+  {
+    "triggerZ": 120,
+    "type": "spawnItem",
+    "params": { "itemType": "gold", "x": -5, "y": 8, "offsetZ": 50 }
+  },
+  {
+    "triggerZ": 150,
+    "type": "spawnObstacle",
+    "params": { "obstacle": "building", "x": 10, "y": 0, "offsetZ": 50 }
+  },
+  {
+    "triggerZ": 180,
+    "type": "spawnEnemy",
+    "params": {
+      "enemyType": 1,
+      "x": 5,
+      "y": 12,
+      "offsetZ": 50,
+      "vx": 8,
+      "rangeX": 10
+    }
+  },
+  {
+    "triggerZ": 210,
+    "type": "spawnEnemy",
+    "params": {
+      "enemyType": 1,
+      "x": -5,
+      "y": 12,
+      "offsetZ": 50,
+      "vx": 8,
+      "rangeX": 10
+    }
+  },
+  {
+    "triggerZ": 240,
+    "type": "spawnObstacle",
+    "params": { "obstacle": "arch", "x": 0, "y": 0, "offsetZ": 50 }
+  },
+  {
+    "triggerZ": 270,
+    "type": "spawnItem",
+    "params": { "itemType": "laserBlue", "x": -10, "y": 8, "offsetZ": 50 }
+  },
+  {
+    "triggerZ": 300,
+    "type": "spawnEnemy",
+    "params": {
+      "enemyType": 2,
+      "x": 8,
+      "y": 1,
+      "offsetZ": 50,
+      "fireInterval": 1.5
+    }
+  },
+  {
+    "triggerZ": 330,
+    "type": "spawnItem",
+    "params": { "itemType": "bomb", "x": 0, "y": 5, "offsetZ": 50 }
+  },
+  {
+    "triggerZ": 360,
+    "type": "spawnObstacle",
+    "params": { "obstacle": "building", "x": -10, "y": 0, "offsetZ": 50 }
+  },
+  {
+    "triggerZ": 390,
+    "type": "spawnEnemy",
+    "params": {
+      "enemyType": 1,
+      "x": 10,
+      "y": 10,
+      "offsetZ": 50,
+      "vx": 10,
+      "rangeX": 15
+    }
+  },
+  {
+    "triggerZ": 420,
+    "type": "spawnEnemy",
+    "params": {
+      "enemyType": 2,
+      "x": -8,
+      "y": 1,
+      "offsetZ": 50,
+      "fireInterval": 2
+    }
+  },
+  {
+    "triggerZ": 450,
+    "type": "spawnItem",
+    "params": { "itemType": "laserRed", "x": 10, "y": 8, "offsetZ": 50 }
+  },
+  {
+    "triggerZ": 480,
+    "type": "spawnObstacle",
+    "params": { "obstacle": "arch", "x": 0, "y": 0, "offsetZ": 50 }
+  },
+  {
+    "triggerZ": 510,
+    "type": "spawnItem",
+    "params": { "itemType": "silver", "x": 5, "y": 8, "offsetZ": 50 }
+  },
+  {
+    "triggerZ": 540,
+    "type": "spawnEnemy",
+    "params": {
+      "enemyType": 1,
+      "x": -5,
+      "y": 10,
+      "offsetZ": 50,
+      "vx": 6,
+      "rangeX": 12
+    }
+  },
+  {
+    "triggerZ": 570,
+    "type": "spawnEnemy",
+    "params": {
+      "enemyType": 2,
+      "x": 5,
+      "y": 1,
+      "offsetZ": 50,
+      "fireInterval": 1
+    }
+  },
+  {
+    "triggerZ": 600,
+    "type": "endLevel",
+    "params": {}
+  }
+]
