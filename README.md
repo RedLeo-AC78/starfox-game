@@ -1,187 +1,142 @@
-# Starfox Rail Shooter - Front End
+# 🚀 Starfox Game - Frontend (Babylon.js)
 
-French
+Jeu 3D inspiré de Star Fox, développé en JavaScript/TypeScript avec le moteur Babylon.js.  
+Le projet propose une expérience de shoot spatial dans un univers moderne et modulaire, prêt à être enrichi !
 
+---
 
-🎮 Présentation
+## 📦 Structure du projet
 
-Starfox Rail Shooter est un jeu de type rail shooter inspiré de la célèbre franchise Star Fox. Le joueur prend les commandes d'un Arwing et parcourt des niveaux linéaires en 3D, affronte des vagues d'ennemis, évite des obstacles, collecte des bonus et créer vos niveaux.
+```
+starfox-game/
+├── public/             # Fichiers statiques (modèles 3D, images, sons)
+├── src/
+│   ├── entities/       # Entités du jeu (joueur, ennemis, obstacles...)
+│   ├── scenes/         # Logique de scènes Babylon.js
+│   ├── controls/       # Gestion des entrées et contrôles
+│   ├── utils/          # Fonctions utilitaires
+│   └── main.ts         # Point d'entrée de l'app
+├── package.json        # Dépendances et scripts NPM
+└── README.md
+```
 
+---
 
-✨ Fonctionnalités
+## 🕹️ Fonctionnalités principales
 
-Système de rail : le vaisseau avance automatiquement, la caméra suit dynamiquement le joueur.
+- **Rendu 3D** avec Babylon.js (scène, caméra, lumières, modèles .glb)
+- **Déplacement du vaisseau** (clavier ou manette)
+- **Gestion des ennemis, obstacles et tirs**
+- **Détection de collisions et gestion du score**
+- **Chargement dynamique des assets**
+- **Interface utilisateur minimaliste (HUD, menus, score)**
+- **Modularité** pour ajouter facilement de nouveaux niveaux, ennemis, items, etc.
 
-Ennemis dynamiques : IA basique, tirs, différents types d’ennemis.
+---
 
-Obstacles : champs d’astéroïdes, barrières à esquiver.
+## 🚀 Lancer le projet en local
 
-Collecte d’objets : anneaux (goldRing), bonus de tirs, bombes.
+1. **Cloner le dépôt**
 
-Bombes : touche B pour détruire tout sur votre passage.
+   ```bash
+   git clone https://github.com/RedLeo-AC78/starfox-game.git
+   cd starfox-game
+   ```
 
-"Do a barrel roll" : touche E pour effectuer un « barrel roll » et éviter les tirs.
+2. **Installer les dépendances**
 
-Panneau d’administration : interface Web (public/admin.html) pour créer ou modifier facilement vos niveaux au format JSON.
+   ```bash
+   npm install
+   ```
 
+3. **Démarrer le serveur de dev**
 
-🛠️ Technologies
+   ```bash
+   npm run dev
+   ```
 
-Babylon.js (rendering 3D)
+4. **Accéder au jeu**
+   - Ouvrez votre navigateur sur [http://localhost:5173](http://localhost:5173) (ou le port affiché dans le terminal)
 
-TypeScript & Vite (bundling & dev server)
+---
 
-Modèles 3D au format glTF (.glb) situés dans public/models
+## 🛠️ Technologies utilisées
 
-Node.js & NPM pour la gestion des dépendances
+- **[Babylon.js](https://www.babylonjs.com/)** - Moteur de rendu 3D moderne
+- **JavaScript / TypeScript** - Logique du jeu
+- **NPM** - Gestion des dépendances
+- **GLTF/GLB** - Format des modèles 3D
+- (Optionnel) **Vite** - Serveur de développement rapide
 
+---
 
-⚙️ Installation
+## 🔗 Fonctionnement général
 
-Prérequis
+- Le fichier `src/main.ts` initialise Babylon.js et la scène principale.
+- Les entités (vaisseau, ennemis, projectiles) sont chargées comme des classes dans `src/entities/`.
+- Les assets 3D sont placés dans le dossier `public/models/` et chargés via `SceneLoader`.
+- La boucle de jeu gère le rendu, les mouvements, les collisions et le score.
+- L’UI/HUD est soit réalisée avec Babylon.js GUI, soit en HTML/CSS overlay.
 
-Node.js (v16 ou supérieure)
+---
 
-NPM (v8 ou supérieure)
+## ✨ Exemple de code d’initialisation Babylon.js
 
-Installer le projet
+```typescript
+const canvas = document.getElementById('renderCanvas') as HTMLCanvasElement;
+const engine = new BABYLON.Engine(canvas, true);
+const scene = new BABYLON.Scene(engine);
 
-# Cloner le dépôt
-git clone <URL_DU_DEPOT>
-cd starfox-game-main
+// Caméra, lumières, chargement du vaisseau...
+// Boucle de rendu
+engine.runRenderLoop(() => {
+  scene.render();
+});
+```
 
-# Installer les dépendances
-npm install
+---
 
+## 📁 Organisation des fichiers
 
-🚀 Utilisation
+- `entities/` : toutes les entités manipulables ou affichées (Player, Enemy, Projectile...)
+- `controls/` : gestion des inputs (clavier, souris, manette)
+- `scenes/` : création et gestion des différentes scènes Babylon.js
+- `utils/` : helpers et fonctions utilitaires
+- `public/models/` : modèles 3D au format GLB/GLTF
+- `public/assets/` : textures, sons...
 
-Mode développement
+---
 
-npm run dev
+## 🤝 Contribuer
 
-Ouvrez ensuite dans votre navigateur : http://localhost:5173/ pour lancer le jeu.
+Les contributions sont les bienvenues !  
+Proposez des issues ou des PR pour :
+- Ajouter des modèles, ennemis, niveaux
+- Améliorer le gameplay ou la performance
+- Corriger des bugs
 
-Build & aperçu en production
+---
 
-npm run build
-npm run preview
+## 📚 Documentation utile
 
-Par défaut, le serveur de preview s'ouvre sur le port 4173 (vérifiez la console pour l'URL exacte).
+- [Babylon.js Documentation](https://doc.babylonjs.com/)
+- [GLTF 3D Asset Format](https://www.khronos.org/gltf/)
+- [MDN JavaScript](https://developer.mozilla.org/fr/docs/Web/JavaScript)
 
-Panneau d'administration
+---
 
-Pour créer ou éditer des niveaux, cliquez sur le bouton Admin en haut à droite du jeu ou ouvrez :
+## 👨‍💻 Équipe
 
-http://localhost:5173/admin.html
+Projet open-source à visée éducative, réalisé par des étudiants passionnés d’informatique, de jeux vidéo et de 3D !
 
-Les fichiers de niveaux sont stockés dans public/levels au format JSON.
+---
 
+## ⚠️ À savoir
 
-🎮 Contrôles
+- Le projet évolue régulièrement.
+- Certains assets sont temporaires ou sujets à modification.
+- Pensez à mettre à jour vos dépendances !
 
-Action                 Touche(s)
+---
 
-Déplacement     /    ZQSD (AZERTY) ou flèches
-
-Accélérer       /    Shift 
-
-Ralentir        /    Ctrl
-
-Tirer           /    Espace
-
-Larguer une bombe  / B
-
-Barrel roll        / E
-
-
-
-# Starfox Rail Shooter - Front End
-
-English
-
-🎮 Overview
-
-Starfox Rail Shooter is a rail shooter game inspired by the classic Star Fox franchise. Players pilot an Arwing through linear 3D courses, battling waves of enemies, dodging obstacles, and collecting power-ups.
-
-✨ Features
-
-3D On-Rails Movement: The ship advances automatically, with a dynamic camera following the player.
-
-Enemy Variety: Basic AI enemies with different behaviors and attack patterns.
-
-Obstacles: Navigate through asteroid fields and energy barriers.
-
-Collectibles: Gather gold rings, weapon upgrades, and bombs.
-
-Bomb Ability: Press B to unleash a bomb, clearing all enemies in range.
-
-Barrel Roll: Press E to perform a barrel roll and evade incoming fire.
-
-Web-Based Level Editor: Use the admin panel (public/admin.html) to create or modify levels stored as JSON files.
-
-🛠️ Technologies
-
-Babylon.js for 3D rendering
-
-TypeScript & Vite for development and bundling
-
-3D models in glTF (.glb) format located in public/models
-
-Node.js & npm for dependency management
-
-⚙️ Installation
-
-Prerequisites
-
-Node.js v16 or later
-
-npm v8 or later
-
-Setup
-
-# Clone the repository
-git clone <REPO_URL>
-cd starfox-game-main
-
-# Install dependencies
-npm install
-
-🚀 Running the Game
-
-Development Mode
-
-npm run dev
-
-Then open your browser to http://localhost:5173/ to play.
-
-Production Build & Preview
-
-npm run build
-npm run preview
-
-By default, the preview server runs on port 4173 (check the console for the exact URL).
-
-Admin Panel
-
-To create or edit levels, click the Admin button at the top-right of the game or open:
-
-http://localhost:5173/admin.html
-
-Levels are stored in public/levels in JSON format.
-
-🎮 Controls
-
-Action        Key(s)
-
-Move        /  WASD (QWERTY) or Arrow Keys
-
-Accelerate  /  Shift
-
-Slow Down   /  Ctrl
-
-Fire        /  Spacebar
-
-Drop Bomb   /  B
-
-Barrel Roll /  E
+Bon jeu 🚀
