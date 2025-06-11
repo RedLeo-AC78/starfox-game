@@ -29,7 +29,7 @@ export class EnemyTypeManager {
 
   async fetchItems() {
     try {
-      const res = await fetch("http://localhost:8000/api/enemies");
+      const res = await fetch("http://localhost:8000/api/enemy-types");
       if (!res.ok) throw new Error("Erreur lors du chargement des types d'ennemis");
       this.list = await res.json();
     } catch (e) {
@@ -49,7 +49,7 @@ export class EnemyTypeManager {
     modelPath: string
   ) {
     try {
-      const res = await fetch("http://localhost:8000/api/enemies", {
+      const res = await fetch("http://localhost:8000/api/enemy-types", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -78,7 +78,7 @@ export class EnemyTypeManager {
 
   async deleteItem(id: number) {
     try {
-      const res = await fetch(`http://localhost:8000/api/enemies/${id}`, {
+      const res = await fetch(`http://localhost:8000/api/enemy-types${id}`, {
         method: "DELETE",
       });
       if (!res.ok) {

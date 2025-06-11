@@ -26,7 +26,7 @@ export class ObstacleTypeManager {
 
   async fetchItems() {
     try {
-      const res = await fetch("http://localhost:8000/api/obstacles");
+      const res = await fetch("http://localhost:8000/api/obstacle-types");
       if (!res.ok) throw new Error("Erreur lors du chargement des obstacles");
       this.list = await res.json();
     } catch (e) {
@@ -39,7 +39,7 @@ export class ObstacleTypeManager {
 
   async addItem(name: string, shape: string, dimensions: string) {
     try {
-      const res = await fetch("http://localhost:8000/api/obstacles", {
+      const res = await fetch("http://localhost:8000/api/obstacle-types", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -65,7 +65,7 @@ export class ObstacleTypeManager {
 
   async deleteItem(id: number) {
     try {
-      const res = await fetch(`http://localhost:8000/api/obstacles/${id}`, {
+      const res = await fetch(`http://localhost:8000/api/obstacle-types${id}`, {
         method: "DELETE",
       });
       if (!res.ok) {

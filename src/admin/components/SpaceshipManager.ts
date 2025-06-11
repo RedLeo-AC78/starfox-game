@@ -1,8 +1,8 @@
 type Spaceship = {
   id: number;
   name: string;
-  baseHp: number;
-  baseSpeed: number;
+  health: number;
+  speed: number;
   maxBombs: number;
   createdAt: string;
   updatedAt: string;
@@ -41,8 +41,8 @@ export class SpaceshipManager {
 
   async addItem(
     name: string,
-    baseHp: number,
-    baseSpeed: number,
+    health: number,
+    speed: number,
     maxBombs: number
   ) {
     try {
@@ -51,8 +51,8 @@ export class SpaceshipManager {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
-          baseHp,
-          baseSpeed,
+          health,
+          speed,
           maxBombs,
         }),
       });
@@ -120,8 +120,8 @@ export class SpaceshipManager {
               (ship) => `
             <tr>
               <td>${ship.name}</td>
-              <td>${ship.baseHp}</td>
-              <td>${ship.baseSpeed}</td>
+              <td>${ship.health}</td>
+              <td>${ship.speed}</td>
               <td>${ship.maxBombs}</td>
               <td>${ship.createdAt}</td>
               <td>${ship.updatedAt}</td>
@@ -141,8 +141,8 @@ export class SpaceshipManager {
       e.preventDefault();
       const form = e.target as HTMLFormElement;
       const name = (form.elements.namedItem("name") as HTMLInputElement).value;
-      const baseHp = +(form.elements.namedItem("baseHp") as HTMLInputElement).value;
-      const baseSpeed = +(form.elements.namedItem("baseSpeed") as HTMLInputElement).value;
+      const baseHp = +(form.elements.namedItem("health") as HTMLInputElement).value;
+      const baseSpeed = +(form.elements.namedItem("speed") as HTMLInputElement).value;
       const maxBombs = +(form.elements.namedItem("maxBombs") as HTMLInputElement).value;
       if (!name.trim() || isNaN(baseHp) || isNaN(baseSpeed) || isNaN(maxBombs)) {
         this.message = "Champs obligatoires manquants.";
