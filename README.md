@@ -82,14 +82,14 @@ Les fichiers de niveaux sont stockés dans public/levels au format JSON.
 
 Action                 Touche(s)
 
-Déplacement         ZQSD (AZERTY) ou flèches
+Déplacement     /    ZQSD (AZERTY) ou flèches
 
-Accélérer           Shift 
+Accélérer       /    Shift 
 
-Ralentir            Ctrl
+Ralentir        /    Ctrl
 
-Tirer               Espace
+Tirer           /    Espace
 
-Larguer une bombe   B
+Larguer une bombe  / B
 
-Barrel roll         E
+Barrel roll        / E
