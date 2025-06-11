@@ -32,6 +32,11 @@ import type { LevelEvent } from "./levelmanager";
 
 import { enemies, obstacles, items } from "./spawners"; // ← IMPORTS ESSENTIELS
 // pour les tableaux PARTAGÉS
+declare global {
+  interface Window {
+    playerShip: AbstractMesh;
+  }
+}
 
 // --- Initialisation de l'engine et de la scène ---
 const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
@@ -86,7 +91,15 @@ SceneLoader.ImportMeshAsync(
   // Optionnel : scaling pour ajuster la taille du modèle
   playerShip.scaling = new Vector3(1, 1, 1);
 
-   camera.lockedTarget = playerShip;
+
+    window.playerShip = playerShip;
+
+
+playerShip.checkCollisions = true;
+
+
+
+  camera.lockedTarget = playerShip;
 
   // Si tu veux réinitialiser la position de la caméra pile derrière le vaisseau :
   camera.target = playerShip.position;
@@ -344,8 +357,10 @@ window.addEventListener(
   (e) => (inputMap[e.key.toLowerCase()] = false)
 );
 
+
 // --- Boucle de jeu principale ---
 scene.onBeforeRenderObservable.add(() => {
+  if (!window.playerShip) return;
   const dt = engine.getDeltaTime() / 1000;
   elapsedTime += dt;
 
@@ -562,122 +577,136 @@ scene.onBeforeRenderObservable.add(() => {
     }
   }
 
-  // collisions lasers -> ennemis
-  for (let i = lasers.length - 1; i >= 0; i--) {
-    for (let j = enemies.length - 1; j >= 0; j--) {
-      if (lasers[i].intersectsMesh(enemies[j].mesh, false)) {
-        const dmg = lasers[i].material === laserMatHyper ? 5 : 2;
-        enemies[j].hp -= dmg;
-        lasers[i].dispose();
-        lasers.splice(i, 1);
-        if (enemies[j].hp <= 0) {
-          enemies[j].mesh.dispose();
-          enemies.splice(j, 1);
-        }
-        break;
-      }
-    }
-  }
-
-  // collisions bombes -> ennemis
-  for (let i = bombs.length - 1; i >= 0; i--) {
-    for (let j = enemies.length - 1; j >= 0; j--) {
-      if (bombs[i].intersectsMesh(enemies[j].mesh, false)) {
-        enemies[j].hp -= 10;
-        bombs[i].dispose();
-        bombs.splice(i, 1);
-        if (enemies[j].hp <= 0) {
-          enemies[j].mesh.dispose();
-          enemies.splice(j, 1);
-        }
-        break;
-      }
-    }
-  }
-
-  // collisions balles ennemies -> joueur
-  for (let b = enemyBullets.length - 1; b >= 0; b--) {
-    if (enemyBullets[b].intersectsMesh(playerShip, false)) {
-      playerHP -= 10;
-      console.log("Touché ! HP =", playerHP);
-      enemyBullets[b].dispose();
-      enemyBullets.splice(b, 1);
-      if (playerHP <= 0) console.log("GAME OVER");
-    }
-  }
-
-  // collision joueur -> ennemis
+// collisions lasers -> ennemis
+for (let i = lasers.length - 1; i >= 0; i--) {
   for (let j = enemies.length - 1; j >= 0; j--) {
-    if (enemies[j].mesh.intersectsMesh(playerShip, false)) {
-      playerHP -= 20;
-      console.log("Collision ennemi ! HP =", playerHP);
-      enemies[j].mesh.dispose();
-      enemies.splice(j, 1);
-      if (playerHP <= 0) console.log("GAME OVER");
-    }
-  }
-
-  // collisions joueur -> obstacles
-  for (const obs of obstacles) {
-    
-    if (obs.intersectsMesh(playerShip, false)) {
-      playerHP -= 10;
-      console.log("Impact obstacle ! HP =", playerHP);
-      playerShip.position.z -= collisionRecoil;
-      
-      collisionCooldown = 0.5;
-      if (playerHP <= 0) console.log("GAME OVER");
-    }
-  }
-
-  // collisions tirs -> obstacles
-  for (let i = lasers.length - 1; i >= 0; i--) {
-    if (obstacles.some((obs) => lasers[i].intersectsMesh(obs, false))) {
+    enemies[j].mesh.checkCollisions = true; // <- ici
+    if (lasers[i].intersectsMesh(enemies[j].mesh, false)) {
+      const dmg = lasers[i].material === laserMatHyper ? 5 : 2;
+      enemies[j].hp -= dmg;
       lasers[i].dispose();
       lasers.splice(i, 1);
+      if (enemies[j].hp <= 0) {
+        enemies[j].mesh.dispose();
+        enemies.splice(j, 1);
+      }
       break;
     }
   }
+}
 
-  // collisions bombes -> obstacles
-  for (let i = bombs.length - 1; i >= 0; i--) {
-    if (obstacles.some((obs) => bombs[i].intersectsMesh(obs, false))) {
+// collisions bombes -> ennemis
+for (let i = bombs.length - 1; i >= 0; i--) {
+  for (let j = enemies.length - 1; j >= 0; j--) {
+    enemies[j].mesh.checkCollisions = true; // <- ici aussi
+    if (bombs[i].intersectsMesh(enemies[j].mesh, false)) {
+      enemies[j].hp -= 10;
       bombs[i].dispose();
       bombs.splice(i, 1);
+      if (enemies[j].hp <= 0) {
+        enemies[j].mesh.dispose();
+        enemies.splice(j, 1);
+      }
       break;
     }
   }
+}
 
-  // collisions joueur -> bonus
-  for (let i = items.length - 1; i >= 0; i--) {
-    if (items[i].mesh.intersectsMesh(playerShip, false)) {
-      const type = items[i].type;
-      if (type === "silver") {
-        playerHP = Math.min(playerHP + 10, 100);
-        console.log("Anneau argent ! HP =", playerHP);
-      } else if (type === "gold") {
-        playerHP = Math.min(playerHP + 25, 100);
-        console.log("Anneau or ! HP =", playerHP);
-      } else if (type === "laserBlue") {
-        if (laserLevel < 2) {
-          laserLevel++;
-          console.log(laserLevel === 1 ? "Double lasers !" : "Hyper lasers !");
-        }
-      } else if (type === "laserRed") {
-        if (laserLevel < 2) {
-          laserLevel = 2;
-          console.log("Hyper lasers (max) !");
-        }
-      } else if (type === "bomb") {
-        if (bombCount < 3) {
-          bombCount++;
-          console.log("Bombe +1 ! Bombes =", bombCount);
-        }
-      }
-      items[i].mesh.dispose();
-      items.splice(i, 1);
-    }
+// collisions balles ennemies -> joueur
+for (let b = enemyBullets.length - 1; b >= 0; b--) {
+  playerShip.checkCollisions = true; // <- ici
+  if (enemyBullets[b].intersectsMesh(window.playerShip, false)) {
+    playerHP -= 10;
+    console.log("Touché ! HP =", playerHP);
+    enemyBullets[b].dispose();
+    enemyBullets.splice(b, 1);
+    if (playerHP <= 0) console.log("GAME OVER");
   }
+}
+
+// collision joueur -> ennemis
+for (let j = enemies.length - 1; j >= 0; j--) {
+  enemies[j].mesh.checkCollisions = true;
+  playerShip.checkCollisions = true;
+  if (enemies[j].mesh.intersectsMesh(window.playerShip, false)) {
+    playerHP -= 20;
+    console.log("Collision ennemi ! HP =", playerHP);
+    enemies[j].mesh.dispose();
+    enemies.splice(j, 1);
+    if (playerHP <= 0) console.log("GAME OVER");
+  }
+}
+
+// collisions joueur -> obstacles
+for (const obs of obstacles) {
+  obs.checkCollisions = true;
+  playerShip.checkCollisions = true;
+  if (obs.intersectsMesh(window.playerShip, false)) {
+    playerHP -= 10;
+    console.log("Impact obstacle ! HP =", playerHP);
+    playerShip.position.z -= collisionRecoil;
+    collisionCooldown = 0.5;
+    if (playerHP <= 0) console.log("GAME OVER");
+  }
+}
+
+// collisions tirs -> obstacles
+for (let i = lasers.length - 1; i >= 0; i--) {
+  if (obstacles.some((obs) => {
+    obs.checkCollisions = true;
+    return lasers[i].intersectsMesh(obs, false);
+  })) {
+    lasers[i].dispose();
+    lasers.splice(i, 1);
+    break;
+  }
+}
+
+// collisions bombes -> obstacles
+for (let i = bombs.length - 1; i >= 0; i--) {
+  if (obstacles.some((obs) => {
+    obs.checkCollisions = true;
+    return bombs[i].intersectsMesh(obs, false);
+  })) {
+    bombs[i].dispose();
+    bombs.splice(i, 1);
+    break;
+  }
+}
+
+// collisions joueur -> bonus
+for (let i = items.length - 1; i >= 0; i--) {
+  items[i].mesh.checkCollisions = true;
+  playerShip.checkCollisions = true;
+  if (items[i].mesh.intersectsMesh(window.playerShip, false)) {
+      items[i].mesh.dispose();
+    const type = items[i].type;
+    if (type === "silver") {
+      playerHP = Math.min(playerHP + 10, 100);
+      console.log("Anneau argent ! HP =", playerHP);
+    } else if (type === "gold") {
+      playerHP = Math.min(playerHP + 25, 100);
+      console.log("Anneau or ! HP =", playerHP);
+    } else if (type === "laserBlue") {
+      if (laserLevel < 2) {
+        laserLevel++;
+        console.log(laserLevel === 1 ? "Double lasers !" : "Hyper lasers !");
+      }
+    } else if (type === "laserRed") {
+      if (laserLevel < 2) {
+        laserLevel = 2;
+        console.log("Hyper lasers (max) !");
+      }
+    } else if (type === "bomb") {
+      if (bombCount < 3) {
+        bombCount++;
+        console.log("Bombe +1 ! Bombes =", bombCount);
+      }
+    }
+    items[i].mesh.dispose();
+    items.splice(i, 1);
+  }
+}
 
   // --- Mise à jour du HUD ---
   hpText.text = `HP : ${playerHP}`;

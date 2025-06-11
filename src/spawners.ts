@@ -54,7 +54,13 @@ export function createEnemy(
     scene
   ).then((result) => {
     const mesh = result.meshes[0]; // Premier mesh importé
+    if (modelName === "wingedPrototype.glb") {
+    mesh.scaling = new Vector3(0.5, 0.5, 0.5);
+  }
+
     mesh.position = new Vector3(x, y, z);
+    mesh.rotation = new Vector3(0, Math.PI, 0)
+      
 
     // Applique une couleur si besoin (matériau custom)
     // const mat = new StandardMaterial("enemyMat", scene);
