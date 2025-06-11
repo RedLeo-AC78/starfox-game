@@ -1,4 +1,4 @@
-# starfox-fangame
+# starfox Rail Shooter - Front End
 
 Starfox Editor
 
