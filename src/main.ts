@@ -11,7 +11,11 @@ import {
   StandardMaterial,
   Animation,
   Scalar,
+  SceneLoader,
+  AbstractMesh, 
 } from "@babylonjs/core";
+
+import "@babylonjs/loaders";
 
 import {
   AdvancedDynamicTexture,
@@ -19,6 +23,8 @@ import {
   StackPanel,
   Control,
 } from "@babylonjs/gui";
+
+
 
 // Import de la classe et du type (type-only import pour LevelEvent)
 import { LevelManager } from "./levelmanager";
@@ -40,17 +46,62 @@ camera.attachControl(false); // plus qu'un seul booléen
 const light = new HemisphericLight("hemiLight", new Vector3(0, 1, 0), scene);
 light.intensity = 0.8;
 
-// --- Vaisseau joueur ---
-const playerShip = MeshBuilder.CreateBox(
-  "playerShip",
-  { width: 2, height: 0.5, depth: 4 },
+let playerShip: AbstractMesh;
+
+playerShip = MeshBuilder.CreateBox(
+  "dummyShip",
+  { size: 0.0001 }, // Taille minuscule
   scene
 );
-playerShip.position.set(0, 5, 0);
-playerShip.rotationQuaternion = null; // on utilise rotation.x/y/z
-const shipMat = new StandardMaterial("shipMat", scene);
-shipMat.diffuseColor = new Color3(0.2, 0.5, 0.8);
-playerShip.material = shipMat;
+playerShip.isVisible = false;
+
+
+
+// --- Vaisseau joueur ---
+// const playerShip = MeshBuilder.CreateBox(
+//   "playerShip",
+//   { width: 2, height: 0.5, depth: 4 },
+//   scene
+// );
+// playerShip.position.set(0, 5, 0);
+// playerShip.rotationQuaternion = null; // on utilise rotation.x/y/z
+// const shipMat = new StandardMaterial("shipMat", scene);
+// shipMat.diffuseColor = new Color3(0.2, 0.5, 0.8);
+// playerShip.material = shipMat;
+
+
+// --- Vaisseau joueur ---
+SceneLoader.ImportMeshAsync(
+  "",
+  "/models/",
+  "arwing.glb",
+  scene
+).then((result) => {
+  
+  scene.removeMesh(playerShip); // Retire le dummy de la scène
+  playerShip = result.meshes[0];
+  playerShip.position = new Vector3(0, 5, 0); // Position de départ
+  // Optionnel : adapter la rotation si besoin
+  playerShip.rotation = new Vector3(0, 0, 0);
+  // Optionnel : scaling pour ajuster la taille du modèle
+  playerShip.scaling = new Vector3(1, 1, 1);
+
+   camera.lockedTarget = playerShip;
+
+  // Si tu veux réinitialiser la position de la caméra pile derrière le vaisseau :
+  camera.target = playerShip.position;
+
+  // Si tu veux pouvoir utiliser rotation.x/y/z plutôt que les quaternions :
+  // playerShip.rotationQuaternion = null;
+
+  // Optionnel : applique un matériau (si le modèle n'a pas déjà sa texture)
+  // const shipMat = new StandardMaterial("shipMat", scene);
+  // shipMat.diffuseColor = new Color3(0.2, 0.5, 0.8);
+  // playerShip.material = shipMat;
+
+  // Stocke playerShip globalement si tu veux le manipuler dans d'autres fonctions
+  // window.playerShip = playerShip; // pour debug/test rapide
+});
 
 // --- Chargement et instanciation du LevelManager ---
 let levelManager: LevelManager;
@@ -568,10 +619,12 @@ scene.onBeforeRenderObservable.add(() => {
 
   // collisions joueur -> obstacles
   for (const obs of obstacles) {
+    
     if (obs.intersectsMesh(playerShip, false)) {
       playerHP -= 10;
       console.log("Impact obstacle ! HP =", playerHP);
       playerShip.position.z -= collisionRecoil;
+      
       collisionCooldown = 0.5;
       if (playerHP <= 0) console.log("GAME OVER");
     }

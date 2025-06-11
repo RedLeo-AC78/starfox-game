@@ -5,12 +5,23 @@ import {
   StandardMaterial,
   Color3,
   Mesh,
+  Vector3,
+  SceneLoader,
+  AbstractMesh,
 } from "@babylonjs/core";
+
+
+
+
+// import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
+
+import "@babylonjs/loaders"; 
 
 // ← Tableaux PARTAGÉS pour toute la logique de jeu
 export const enemies: any[] = [];
 export const obstacles: Mesh[] = [];
-export const items: { mesh: Mesh; type: string }[] = [];
+export const items: { mesh: AbstractMesh; type: string }[] = [];
+
 
 /**
  * Crée un ennemi (drone ou tourelle) et l’ajoute à `enemies[]`
@@ -28,18 +39,37 @@ export function createEnemy(
   const mat = new StandardMaterial("enemyMat", scene);
   mat.diffuseColor = new Color3(1, 0, 0);
 
-  let mesh;
+ let modelName: string;
   if (type === 1) {
-    mesh = MeshBuilder.CreateSphere("drone", { diameter: 1 }, scene);
-    enemies.push({ mesh, hp: 10, type, vx, originX: x, rangeX });
+    modelName = "wingedPrototype.glb";
   } else {
-    mesh = MeshBuilder.CreateBox("turret", { size: 2 }, scene);
-    enemies.push({ mesh, hp: 15, type, shootTimer: 0, fireInterval });
+    modelName = "landMaster.glb";
   }
 
-  mesh.material = mat;
-  mesh.position.set(x, y, z);
+  // Charge le modèle 3D
+  SceneLoader.ImportMeshAsync(
+    "",
+    "/models/",         // Attention : ce chemin est relatif à /public
+    modelName,
+    scene
+  ).then((result) => {
+    const mesh = result.meshes[0]; // Premier mesh importé
+    mesh.position = new Vector3(x, y, z);
+
+    // Applique une couleur si besoin (matériau custom)
+    // const mat = new StandardMaterial("enemyMat", scene);
+    // mat.diffuseColor = new Color3(1, 0, 0);
+    // mesh.material = mat;
+
+    // Ajoute à la liste des ennemis avec les propriétés existantes
+    if (type === 1) {
+      enemies.push({ mesh, hp: 10, type, vx, originX: x, rangeX });
+    } else {
+      enemies.push({ mesh, hp: 15, type, shootTimer: 0, fireInterval });
+    }
+  });
 }
+
 
 /**
  * Crée un obstacle ("arch" ou "building") et l’ajoute à `obstacles[]`
@@ -100,45 +130,39 @@ export function createItem(
   z: number
 ): void {
   const mat = new StandardMaterial(kind + "Mat", scene);
-  let mesh;
-
+  
+  // Correspondance type de bonus <-> modèle
+  let modelName = "";
   switch (kind) {
     case "silver":
-      mat.diffuseColor = new Color3(0.8, 0.8, 0.8);
-      mesh = MeshBuilder.CreateTorus(
-        "silverRing",
-        { diameter: 5, thickness: 0.5 },
-        scene
-      );
-      mesh.rotation.x = Math.PI / 2;
+      modelName = "silverRing.glb";
       break;
     case "gold":
-      mat.diffuseColor = new Color3(1, 0.8, 0);
-      mesh = MeshBuilder.CreateTorus(
-        "goldRing",
-        { diameter: 5, thickness: 0.5 },
-        scene
-      );
-      mesh.rotation.x = Math.PI / 2;
+      modelName = "goldRing.glb";
       break;
     case "laserBlue":
-      mat.diffuseColor = new Color3(0, 0, 1);
-      mesh = MeshBuilder.CreateBox("laserBluePU", { size: 2 }, scene);
+      modelName = "blueLaser.glb";
       break;
     case "laserRed":
-      mat.diffuseColor = new Color3(1, 0, 0);
-      mesh = MeshBuilder.CreateBox("laserRedPU", { size: 2 }, scene);
+      modelName = "redLaser.glb";
       break;
     case "bomb":
-      mat.diffuseColor = new Color3(1, 1, 1);
-      mesh = MeshBuilder.CreateSphere("bombPU", { diameter: 1.5 }, scene);
+      modelName = "smartBomb.glb"; // OU garde la sphère si pas de modèle
       break;
     default:
       console.warn("createItem: type inconnu", kind);
       return;
   }
-
-  mesh.material = mat;
-  mesh.position.set(x, y, z);
-  items.push({ mesh, type: kind });
+  // Chargement du modèle 3D :
+  SceneLoader.ImportMeshAsync(
+    "",
+    "/models/",
+    modelName,
+    scene
+  ).then((result) => {
+    const mesh = result.meshes[0];
+    mesh.position = new Vector3(x, y, z);
+    // Option : mesh.scaling = new Vector3(1, 1, 1);
+    items.push({ mesh, type: kind });
+  });
 }
