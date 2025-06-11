@@ -77,16 +77,22 @@ SceneLoader.ImportMeshAsync(
   "arwing.glb",
   scene
 ).then((result) => {
-  const playerShip = result.meshes[0];
+  
   scene.removeMesh(playerShip); // Retire le dummy de la scène
+  playerShip = result.meshes[0];
   playerShip.position = new Vector3(0, 5, 0); // Position de départ
   // Optionnel : adapter la rotation si besoin
   playerShip.rotation = new Vector3(0, 0, 0);
   // Optionnel : scaling pour ajuster la taille du modèle
   playerShip.scaling = new Vector3(1, 1, 1);
 
+   camera.lockedTarget = playerShip;
+
+  // Si tu veux réinitialiser la position de la caméra pile derrière le vaisseau :
+  camera.target = playerShip.position;
+
   // Si tu veux pouvoir utiliser rotation.x/y/z plutôt que les quaternions :
-  playerShip.rotationQuaternion = null;
+  // playerShip.rotationQuaternion = null;
 
   // Optionnel : applique un matériau (si le modèle n'a pas déjà sa texture)
   // const shipMat = new StandardMaterial("shipMat", scene);
