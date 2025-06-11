@@ -1,6 +1,6 @@
-# starfox Rail Shooter - Front End
+# Starfox Rail Shooter - Front End
 
-Starfox Editor
+French
 
 
 🎮 Présentation
@@ -93,3 +93,95 @@ Tirer           /    Espace
 Larguer une bombe  / B
 
 Barrel roll        / E
+
+
+
+# Starfox Rail Shooter - Front End
+
+English
+
+🎮 Overview
+
+Starfox Rail Shooter is a rail shooter game inspired by the classic Star Fox franchise. Players pilot an Arwing through linear 3D courses, battling waves of enemies, dodging obstacles, and collecting power-ups.
+
+✨ Features
+
+3D On-Rails Movement: The ship advances automatically, with a dynamic camera following the player.
+
+Enemy Variety: Basic AI enemies with different behaviors and attack patterns.
+
+Obstacles: Navigate through asteroid fields and energy barriers.
+
+Collectibles: Gather gold rings, weapon upgrades, and bombs.
+
+Bomb Ability: Press B to unleash a bomb, clearing all enemies in range.
+
+Barrel Roll: Press E to perform a barrel roll and evade incoming fire.
+
+Web-Based Level Editor: Use the admin panel (public/admin.html) to create or modify levels stored as JSON files.
+
+🛠️ Technologies
+
+Babylon.js for 3D rendering
+
+TypeScript & Vite for development and bundling
+
+3D models in glTF (.glb) format located in public/models
+
+Node.js & npm for dependency management
+
+⚙️ Installation
+
+Prerequisites
+
+Node.js v16 or later
+
+npm v8 or later
+
+Setup
+
+# Clone the repository
+git clone <REPO_URL>
+cd starfox-game-main
+
+# Install dependencies
+npm install
+
+🚀 Running the Game
+
+Development Mode
+
+npm run dev
+
+Then open your browser to http://localhost:5173/ to play.
+
+Production Build & Preview
+
+npm run build
+npm run preview
+
+By default, the preview server runs on port 4173 (check the console for the exact URL).
+
+Admin Panel
+
+To create or edit levels, click the Admin button at the top-right of the game or open:
+
+http://localhost:5173/admin.html
+
+Levels are stored in public/levels in JSON format.
+
+🎮 Controls
+
+Action        Key(s)
+
+Move        /  WASD (QWERTY) or Arrow Keys
+
+Accelerate  /  Shift
+
+Slow Down   /  Ctrl
+
+Fire        /  Spacebar
+
+Drop Bomb   /  B
+
+Barrel Roll /  E
