@@ -27,7 +27,7 @@ export class WeaponManager {
 
   async fetchItems() {
     try {
-      const res = await fetch("http://localhost:8000/api/weapons");
+      const res = await fetch("http://localhost:8001/api/weapons");
       if (!res.ok) throw new Error("Erreur lors du chargement des armes");
       this.list = await res.json();
     } catch (e) {
@@ -46,7 +46,7 @@ export class WeaponManager {
     levelRequired: number
   ) {
     try {
-      const res = await fetch("http://localhost:8000/api/weapons", {
+      const res = await fetch("http://localhost:8001/api/weapons", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -74,7 +74,7 @@ export class WeaponManager {
 
   async deleteItem(id: number) {
     try {
-      const res = await fetch(`http://localhost:8000/api/weapons/${id}`, {
+      const res = await fetch(`http://localhost:8001/api/weapons/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) {
@@ -95,7 +95,11 @@ export class WeaponManager {
   render() {
     this.el.innerHTML = `
       <h2>Armes</h2>
-      ${this.message ? `<div class="${this.messageType}">${this.message}</div>` : ""}
+      ${
+        this.message
+          ? `<div class="${this.messageType}">${this.message}</div>`
+          : ""
+      }
       <form id="add-form">
         <input name="name" placeholder="Nom" required />
         <input name="damage" type="number" placeholder="Dégâts" required />
@@ -141,11 +145,22 @@ export class WeaponManager {
       e.preventDefault();
       const form = e.target as HTMLFormElement;
       const name = (form.elements.namedItem("name") as HTMLInputElement).value;
-      const damage = +(form.elements.namedItem("damage") as HTMLInputElement).value;
-      const cooldown = +(form.elements.namedItem("cooldown") as HTMLInputElement).value;
+      const damage = +(form.elements.namedItem("damage") as HTMLInputElement)
+        .value;
+      const cooldown = +(
+        form.elements.namedItem("cooldown") as HTMLInputElement
+      ).value;
       const type = (form.elements.namedItem("type") as HTMLInputElement).value;
-      const levelRequired = +(form.elements.namedItem("levelRequired") as HTMLInputElement).value;
-      if (!name.trim() || isNaN(damage) || isNaN(cooldown) || !type.trim() || isNaN(levelRequired)) {
+      const levelRequired = +(
+        form.elements.namedItem("levelRequired") as HTMLInputElement
+      ).value;
+      if (
+        !name.trim() ||
+        isNaN(damage) ||
+        isNaN(cooldown) ||
+        !type.trim() ||
+        isNaN(levelRequired)
+      ) {
         this.message = "Champs obligatoires manquants.";
         this.messageType = "error";
         this.render();

@@ -28,7 +28,7 @@ export class SpaceshipManager {
 
   async fetchItems() {
     try {
-      const res = await fetch("http://localhost:8000/api/spaceships");
+      const res = await fetch("http://localhost:8001/api/spaceships");
       if (!res.ok) throw new Error("Erreur lors du chargement des vaisseaux");
       this.list = await res.json();
     } catch (e) {
@@ -39,14 +39,9 @@ export class SpaceshipManager {
     this.render();
   }
 
-  async addItem(
-    name: string,
-    health: number,
-    speed: number,
-    maxBombs: number
-  ) {
+  async addItem(name: string, health: number, speed: number, maxBombs: number) {
     try {
-      const res = await fetch("http://localhost:8000/api/spaceships", {
+      const res = await fetch("http://localhost:8001/api/spaceships", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -73,7 +68,7 @@ export class SpaceshipManager {
 
   async deleteItem(id: number) {
     try {
-      const res = await fetch(`http://localhost:8000/api/spaceships/${id}`, {
+      const res = await fetch(`http://localhost:8001/api/spaceships/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) {
@@ -94,7 +89,11 @@ export class SpaceshipManager {
   render() {
     this.el.innerHTML = `
       <h2>Vaisseaux</h2>
-      ${this.message ? `<div class="${this.messageType}">${this.message}</div>` : ""}
+      ${
+        this.message
+          ? `<div class="${this.messageType}">${this.message}</div>`
+          : ""
+      }
       <form id="add-form">
         <input name="name" placeholder="Nom" required />
         <input name="baseHp" type="number" placeholder="Vie de base" required />
@@ -141,10 +140,19 @@ export class SpaceshipManager {
       e.preventDefault();
       const form = e.target as HTMLFormElement;
       const name = (form.elements.namedItem("name") as HTMLInputElement).value;
-      const baseHp = +(form.elements.namedItem("health") as HTMLInputElement).value;
-      const baseSpeed = +(form.elements.namedItem("speed") as HTMLInputElement).value;
-      const maxBombs = +(form.elements.namedItem("maxBombs") as HTMLInputElement).value;
-      if (!name.trim() || isNaN(baseHp) || isNaN(baseSpeed) || isNaN(maxBombs)) {
+      const baseHp = +(form.elements.namedItem("health") as HTMLInputElement)
+        .value;
+      const baseSpeed = +(form.elements.namedItem("speed") as HTMLInputElement)
+        .value;
+      const maxBombs = +(
+        form.elements.namedItem("maxBombs") as HTMLInputElement
+      ).value;
+      if (
+        !name.trim() ||
+        isNaN(baseHp) ||
+        isNaN(baseSpeed) ||
+        isNaN(maxBombs)
+      ) {
         this.message = "Champs obligatoires manquants.";
         this.messageType = "error";
         this.render();

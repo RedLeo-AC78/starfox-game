@@ -25,7 +25,7 @@ export class LevelManager {
 
   async fetchItems() {
     try {
-      const res = await fetch("http://localhost:8000/api/levels");
+      const res = await fetch("http://localhost:8001/api/levels");
       if (!res.ok) throw new Error("Erreur lors du chargement des niveaux");
       this.list = await res.json();
     } catch (e) {
@@ -38,7 +38,7 @@ export class LevelManager {
 
   async addItem(name: string, jsonData: string) {
     try {
-      const res = await fetch("http://localhost:8000/api/levels", {
+      const res = await fetch("http://localhost:8001/api/levels", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -63,7 +63,7 @@ export class LevelManager {
 
   async deleteItem(id: number) {
     try {
-      const res = await fetch(`http://localhost:8000/api/levels/${id}`, {
+      const res = await fetch(`http://localhost:8001/api/levels/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) {
@@ -84,7 +84,11 @@ export class LevelManager {
   render() {
     this.el.innerHTML = `
       <h2>Niveaux</h2>
-      ${this.message ? `<div class="${this.messageType}">${this.message}</div>` : ""}
+      ${
+        this.message
+          ? `<div class="${this.messageType}">${this.message}</div>`
+          : ""
+      }
       <form id="add-form">
         <input name="name" placeholder="Nom" required />
         <textarea name="jsonData" placeholder="Json data" required rows="3" style="width: 240px;"></textarea>
@@ -123,7 +127,8 @@ export class LevelManager {
       e.preventDefault();
       const form = e.target as HTMLFormElement;
       const name = (form.elements.namedItem("name") as HTMLInputElement).value;
-      const jsonData = (form.elements.namedItem("jsonData") as HTMLInputElement).value;
+      const jsonData = (form.elements.namedItem("jsonData") as HTMLInputElement)
+        .value;
       if (!name.trim() || !jsonData.trim()) {
         this.message = "Champs obligatoires manquants.";
         this.messageType = "error";

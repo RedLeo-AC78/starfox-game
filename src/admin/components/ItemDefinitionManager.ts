@@ -28,7 +28,7 @@ export class ItemDefinitionManager {
 
   async fetchItems() {
     try {
-      const res = await fetch("http://localhost:8000/api/items");
+      const res = await fetch("http://localhost:8001/api/items");
       if (!res.ok) throw new Error("Erreur lors du chargement des objets");
       this.list = await res.json();
     } catch (e) {
@@ -47,7 +47,7 @@ export class ItemDefinitionManager {
     iconPath: string
   ) {
     try {
-      const res = await fetch("http://localhost:8000/api/items", {
+      const res = await fetch("http://localhost:8001/api/items", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -75,7 +75,7 @@ export class ItemDefinitionManager {
 
   async deleteItem(id: number) {
     try {
-      const res = await fetch(`http://localhost:8000/api/items/${id}`, {
+      const res = await fetch(`http://localhost:8001/api/items/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) {
@@ -96,7 +96,11 @@ export class ItemDefinitionManager {
   render() {
     this.el.innerHTML = `
       <h2>Objets</h2>
-      ${this.message ? `<div class="${this.messageType}">${this.message}</div>` : ""}
+      ${
+        this.message
+          ? `<div class="${this.messageType}">${this.message}</div>`
+          : ""
+      }
       <form id="add-form">
         <input name="itemKey" placeholder="Clé (itemKey)" required />
         <input name="name" placeholder="Nom" required />
@@ -126,10 +130,16 @@ export class ItemDefinitionManager {
               <td>${item.name}</td>
               <td>${item.effectType}</td>
               <td>${item.effectValue}</td>
-              <td><span title="${item.iconPath}">${item.iconPath ? `<img src="${item.iconPath}" alt="icone" style="height:28px;vertical-align:middle;border-radius:5px;background:#eee;" onerror="this.style.display='none'">` : ""}</span></td>
+              <td><span title="${item.iconPath}">${
+                item.iconPath
+                  ? `<img src="${item.iconPath}" alt="icone" style="height:28px;vertical-align:middle;border-radius:5px;background:#eee;" onerror="this.style.display='none'">`
+                  : ""
+              }</span></td>
               <td>${item.createdAt}</td>
               <td class="actions">
-                <button data-id="${item.id}" class="delete-btn">Supprimer</button>
+                <button data-id="${
+                  item.id
+                }" class="delete-btn">Supprimer</button>
               </td>
             </tr>
           `
@@ -143,12 +153,24 @@ export class ItemDefinitionManager {
     this.el.querySelector("#add-form")?.addEventListener("submit", (e) => {
       e.preventDefault();
       const form = e.target as HTMLFormElement;
-      const itemKey = (form.elements.namedItem("itemKey") as HTMLInputElement).value;
+      const itemKey = (form.elements.namedItem("itemKey") as HTMLInputElement)
+        .value;
       const name = (form.elements.namedItem("name") as HTMLInputElement).value;
-      const effectType = (form.elements.namedItem("effectType") as HTMLInputElement).value;
-      const effectValue = +(form.elements.namedItem("effectValue") as HTMLInputElement).value;
-      const iconPath = (form.elements.namedItem("iconPath") as HTMLInputElement).value;
-      if (!itemKey.trim() || !name.trim() || !effectType.trim() || isNaN(effectValue) || !iconPath.trim()) {
+      const effectType = (
+        form.elements.namedItem("effectType") as HTMLInputElement
+      ).value;
+      const effectValue = +(
+        form.elements.namedItem("effectValue") as HTMLInputElement
+      ).value;
+      const iconPath = (form.elements.namedItem("iconPath") as HTMLInputElement)
+        .value;
+      if (
+        !itemKey.trim() ||
+        !name.trim() ||
+        !effectType.trim() ||
+        isNaN(effectValue) ||
+        !iconPath.trim()
+      ) {
         this.message = "Champs obligatoires manquants.";
         this.messageType = "error";
         this.render();

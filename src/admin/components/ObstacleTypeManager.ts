@@ -26,7 +26,7 @@ export class ObstacleTypeManager {
 
   async fetchItems() {
     try {
-      const res = await fetch("http://localhost:8000/api/obstacle-types");
+      const res = await fetch("http://localhost:8001/api/obstacle-types");
       if (!res.ok) throw new Error("Erreur lors du chargement des obstacles");
       this.list = await res.json();
     } catch (e) {
@@ -39,7 +39,7 @@ export class ObstacleTypeManager {
 
   async addItem(name: string, shape: string, dimensions: string) {
     try {
-      const res = await fetch("http://localhost:8000/api/obstacle-types", {
+      const res = await fetch("http://localhost:8001/api/obstacle-types", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -65,7 +65,7 @@ export class ObstacleTypeManager {
 
   async deleteItem(id: number) {
     try {
-      const res = await fetch(`http://localhost:8000/api/obstacle-types${id}`, {
+      const res = await fetch(`http://localhost:8001/api/obstacle-types${id}`, {
         method: "DELETE",
       });
       if (!res.ok) {
@@ -86,7 +86,11 @@ export class ObstacleTypeManager {
   render() {
     this.el.innerHTML = `
       <h2>Types d'obstacles</h2>
-      ${this.message ? `<div class="${this.messageType}">${this.message}</div>` : ""}
+      ${
+        this.message
+          ? `<div class="${this.messageType}">${this.message}</div>`
+          : ""
+      }
       <form id="add-form">
         <input name="name" placeholder="Nom" required />
         <input name="shape" placeholder="Forme" required />
@@ -128,8 +132,11 @@ export class ObstacleTypeManager {
       e.preventDefault();
       const form = e.target as HTMLFormElement;
       const name = (form.elements.namedItem("name") as HTMLInputElement).value;
-      const shape = (form.elements.namedItem("shape") as HTMLInputElement).value;
-      const dimensions = (form.elements.namedItem("dimensions") as HTMLInputElement).value;
+      const shape = (form.elements.namedItem("shape") as HTMLInputElement)
+        .value;
+      const dimensions = (
+        form.elements.namedItem("dimensions") as HTMLInputElement
+      ).value;
       if (!name.trim() || !shape.trim() || !dimensions.trim()) {
         this.message = "Champs obligatoires manquants.";
         this.messageType = "error";

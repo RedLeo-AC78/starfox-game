@@ -29,8 +29,9 @@ export class EnemyTypeManager {
 
   async fetchItems() {
     try {
-      const res = await fetch("http://localhost:8000/api/enemy-types");
-      if (!res.ok) throw new Error("Erreur lors du chargement des types d'ennemis");
+      const res = await fetch("http://localhost:8001/api/enemy-types");
+      if (!res.ok)
+        throw new Error("Erreur lors du chargement des types d'ennemis");
       this.list = await res.json();
     } catch (e) {
       this.message = "Erreur réseau : " + (e as Error).message;
@@ -49,7 +50,7 @@ export class EnemyTypeManager {
     modelPath: string
   ) {
     try {
-      const res = await fetch("http://localhost:8000/api/enemy-types", {
+      const res = await fetch("http://localhost:8001/api/enemy-types", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -78,7 +79,7 @@ export class EnemyTypeManager {
 
   async deleteItem(id: number) {
     try {
-      const res = await fetch(`http://localhost:8000/api/enemy-types${id}`, {
+      const res = await fetch(`http://localhost:8001/api/enemy-types${id}`, {
         method: "DELETE",
       });
       if (!res.ok) {
@@ -99,7 +100,11 @@ export class EnemyTypeManager {
   render() {
     this.el.innerHTML = `
       <h2>Types d'ennemis</h2>
-      ${this.message ? `<div class="${this.messageType}">${this.message}</div>` : ""}
+      ${
+        this.message
+          ? `<div class="${this.messageType}">${this.message}</div>`
+          : ""
+      }
       <form id="add-form">
         <input name="name" placeholder="Nom" required />
         <input name="hp" type="number" placeholder="HP" required />
@@ -132,10 +137,16 @@ export class EnemyTypeManager {
               <td>${enemy.speed}</td>
               <td>${enemy.pattern}</td>
               <td>${enemy.fireInterval}</td>
-              <td><span title="${enemy.modelPath}">${enemy.modelPath ? `<img src="${enemy.modelPath}" alt="model" style="height:28px;vertical-align:middle;border-radius:5px;background:#eee;" onerror="this.style.display='none'">` : ""}</span></td>
+              <td><span title="${enemy.modelPath}">${
+                enemy.modelPath
+                  ? `<img src="${enemy.modelPath}" alt="model" style="height:28px;vertical-align:middle;border-radius:5px;background:#eee;" onerror="this.style.display='none'">`
+                  : ""
+              }</span></td>
               <td>${enemy.createdAt}</td>
               <td class="actions">
-                <button data-id="${enemy.id}" class="delete-btn">Supprimer</button>
+                <button data-id="${
+                  enemy.id
+                }" class="delete-btn">Supprimer</button>
               </td>
             </tr>
           `
@@ -151,10 +162,16 @@ export class EnemyTypeManager {
       const form = e.target as HTMLFormElement;
       const name = (form.elements.namedItem("name") as HTMLInputElement).value;
       const hp = +(form.elements.namedItem("hp") as HTMLInputElement).value;
-      const speed = +(form.elements.namedItem("speed") as HTMLInputElement).value;
-      const pattern = (form.elements.namedItem("pattern") as HTMLInputElement).value;
-      const fireInterval = +(form.elements.namedItem("fireInterval") as HTMLInputElement).value;
-      const modelPath = (form.elements.namedItem("modelPath") as HTMLInputElement).value;
+      const speed = +(form.elements.namedItem("speed") as HTMLInputElement)
+        .value;
+      const pattern = (form.elements.namedItem("pattern") as HTMLInputElement)
+        .value;
+      const fireInterval = +(
+        form.elements.namedItem("fireInterval") as HTMLInputElement
+      ).value;
+      const modelPath = (
+        form.elements.namedItem("modelPath") as HTMLInputElement
+      ).value;
       if (
         !name.trim() ||
         isNaN(hp) ||
